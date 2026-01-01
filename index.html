@@ -566,6 +566,22 @@
             background: #25c46a;
             transform: translateY(-2px);
         }
+
+        .vercel-setup {
+            background: rgba(0, 121, 255, 0.1);
+            border: 1px solid var(--primary);
+            border-radius: var(--border-radius);
+            padding: 15px;
+            margin-top: 20px;
+        }
+
+        .vercel-setup h5 {
+            color: var(--primary);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
     </style>
 </head>
 <body>
@@ -590,7 +606,7 @@
                     </button>
                 </div>
                 <div class="script-form">
-                    <input type="text" id="scriptName" placeholder="Nama Script (contoh: Auto Farm, GUI, Teleport)">
+                    <input type="text" id="scriptName" placeholder="Nama Script (contoh: AutoFarm, TeleportGUI, Tes123)">
                     <textarea id="scriptContent" placeholder="Masukkan script Roblox di sini..."></textarea>
                     <div class="form-actions">
                         <button class="btn" id="saveBtn">
@@ -603,7 +619,7 @@
                             <i class="fas fa-play"></i> Jalankan di Console
                         </button>
                         <button class="btn btn-warning" id="getRawLinkBtn">
-                            <i class="fas fa-link"></i> Get Raw File
+                            <i class="fas fa-link"></i> Generate Raw URL
                         </button>
                         <button class="btn btn-danger" id="deleteAllBtn">
                             <i class="fas fa-trash-alt"></i> Hapus Semua
@@ -637,6 +653,7 @@
                 <a href="#" id="importBtn"><i class="fas fa-upload"></i> Import Script</a>
                 <a href="#" id="howToUseBtn"><i class="fas fa-question-circle"></i> Cara Penggunaan</a>
                 <a href="#" id="viewAllRawLinksBtn"><i class="fas fa-external-link-alt"></i> Semua Raw Files</a>
+                <a href="#" id="vercelGuideBtn"><i class="fas fa-server"></i> Panduan Vercel</a>
             </div>
         </footer>
     </div>
@@ -666,17 +683,14 @@
                 <h4>2. Memuat Script</h4>
                 <p>Klik pada script di daftar untuk memuatnya ke editor.</p>
                 
-                <h4>3. Get Raw File untuk Executor</h4>
-                <p>Klik "Get Raw File" untuk mendapatkan file .lua yang bisa digunakan di executor Roblox.</p>
+                <h4>3. Generate Raw URL untuk Executor</h4>
+                <p>Klik "Generate Raw URL" untuk mendapatkan file .lua yang bisa diakses via URL.</p>
                 
-                <h4>4. Menjalankan di Executor</h4>
-                <p>Copy link raw file, lalu paste di executor dengan format: <code>loadstring(game:HttpGet("URL_FILE.LUA"))()</code></p>
+                <h4>4. Deploy ke Vercel</h4>
+                <p>Setelah deploy, semua file .lua akan tersedia di URL: <code>https://[app-name].vercel.app/scripts/[filename].lua</code></p>
                 
-                <h4>5. Export/Import</h4>
-                <p>Gunakan tombol export/import di footer untuk backup atau pindah data.</p>
-                
-                <h4>6. Deploy ke Vercel</h4>
-                <p>Upload file ini ke GitHub repository, lalu import ke Vercel untuk hosting gratis.</p>
+                <h4>5. Menjalankan di Executor</h4>
+                <p>Gunakan format: <code>loadstring(game:HttpGet("https://[app-name].vercel.app/scripts/[filename].lua"))()</code></p>
             </div>
             <div class="modal-actions">
                 <button class="btn" id="closeHowToBtn">Mengerti</button>
@@ -688,17 +702,17 @@
     <div class="modal" id="rawLinkModal">
         <div class="modal-content">
             <button class="modal-close" id="closeRawLinkModal">&times;</button>
-            <h3 class="modal-title"><i class="fas fa-file-code"></i> Raw File .lua</h3>
+            <h3 class="modal-title"><i class="fas fa-file-code"></i> Raw File .lua untuk Vercel</h3>
             
             <div class="file-info">
                 <i class="fas fa-file-alt"></i>
                 <div>
                     <strong>Nama File:</strong> <span id="fileName">script.lua</span><br>
-                    <strong>Ukuran:</strong> <span id="fileSize">0 KB</span>
+                    <strong>Path di Vercel:</strong> <span id="filePath">/scripts/script.lua</span>
                 </div>
             </div>
             
-            <p>File .lua ini siap digunakan di executor:</p>
+            <p>File .lua ini siap di-deploy ke Vercel:</p>
             
             <div class="raw-link-container">
                 <div class="raw-link-code" id="rawLinkText"></div>
@@ -709,10 +723,7 @@
                     <i class="fas fa-download"></i> Download File .lua
                 </a>
                 <button class="btn btn-success" id="copyRawLinkBtn">
-                    <i class="fas fa-copy"></i> Copy Link
-                </button>
-                <button class="btn btn-secondary" id="testRawLinkBtn">
-                    <i class="fas fa-test"></i> Test Load
+                    <i class="fas fa-copy"></i> Copy URL
                 </button>
                 <button class="btn btn-warning" id="copyExecutorCodeBtn">
                     <i class="fas fa-terminal"></i> Copy Executor Code
@@ -722,15 +733,14 @@
             <div class="executor-example">
                 <h4><i class="fas fa-terminal"></i> Contoh Penggunaan di Executor</h4>
                 <div class="executor-tabs">
-                    <button class="executor-tab active" data-tab="basic">Basic</button>
+                    <button class="executor-tab active" data-tab="vercel">Vercel URL</button>
                     <button class="executor-tab" data-tab="synapse">Synapse X</button>
                     <button class="executor-tab" data-tab="krnl">KRNL</button>
                     <button class="executor-tab" data-tab="scriptware">Script-Ware</button>
-                    <button class="executor-tab" data-tab="oxygen">Oxygen U</button>
                 </div>
                 
-                <div class="executor-content active" id="basic-tab">
-                    <div class="executor-code">loadstring(game:HttpGet("<span class="url" id="basicUrl">URL_FILE</span>"))()</div>
+                <div class="executor-content active" id="vercel-tab">
+                    <div class="executor-code">loadstring(game:HttpGet("<span class="url" id="vercelUrl">URL_FILE</span>"))()</div>
                 </div>
                 
                 <div class="executor-content" id="synapse-tab">
@@ -744,38 +754,72 @@
                 <div class="executor-content" id="scriptware-tab">
                     <div class="executor-code">loadstring(game:HttpGet("<span class="url" id="scriptwareUrl">URL_FILE</span>", true))()</div>
                 </div>
-                
-                <div class="executor-content" id="oxygen-tab">
-                    <div class="executor-code">loadstring(game:HttpGetAsync("<span class="url" id="oxygenUrl">URL_FILE</span>"))()</div>
-                </div>
             </div>
 
-            <div style="margin-top: 20px; padding: 15px; background: rgba(255, 165, 0, 0.1); border-radius: 8px; border-left: 4px solid var(--warning);">
-                <p><strong>Tips:</strong> Setelah deploy ke Vercel, Anda bisa upload file .lua ke GitHub dan dapatkan raw link GitHub:</p>
-                <code style="display: block; margin-top: 5px; color: var(--secondary);">https://raw.githubusercontent.com/[username]/[repo]/main/[filename].lua</code>
+            <div class="vercel-setup">
+                <h5><i class="fas fa-server"></i> Instruksi Deploy ke Vercel:</h5>
+                <ol style="margin-left: 20px; margin-bottom: 10px;">
+                    <li>Download semua file .lua yang diinginkan</li>
+                    <li>Buat folder <code>/scripts</code> di project Anda</li>
+                    <li>Masukkan file .lua ke folder <code>/scripts</code></li>
+                    <li>Upload ke GitHub repository</li>
+                    <li>Import ke Vercel</li>
+                </ol>
+                <p><strong>URL setelah deploy:</strong><br>
+                <code>https://[nama-app-anda].vercel.app/scripts/<span id="exampleFilename">script.lua</span></code></p>
             </div>
         </div>
     </div>
 
-    <!-- Modal untuk semua raw files -->
-    <div class="modal" id="allRawLinksModal">
+    <!-- Modal untuk panduan Vercel -->
+    <div class="modal" id="vercelGuideModal">
         <div class="modal-content">
-            <button class="modal-close" id="closeAllRawLinksModal">&times;</button>
-            <h3 class="modal-title"><i class="fas fa-list"></i> Semua Raw Files</h3>
-            <p>Daftar semua script dengan file .lua untuk executor:</p>
+            <button class="modal-close" id="closeVercelGuideModal">&times;</button>
+            <h3 class="modal-title"><i class="fas fa-server"></i> Panduan Deploy ke Vercel</h3>
             
-            <div id="allRawLinksList" style="max-height: 400px; overflow-y: auto; margin-top: 15px;">
-                <!-- Daftar semua file akan dimuat di sini -->
+            <div style="margin-bottom: 20px;">
+                <h4>📁 Struktur File untuk Vercel:</h4>
+                <div style="background: var(--darker); padding: 15px; border-radius: 8px; font-family: 'Roboto Mono', monospace;">
+                    your-project/<br>
+                    ├── index.html          # File ini<br>
+                    ├── scripts/            # Folder untuk semua file .lua<br>
+                    │   ├── AutoFarm.lua<br>
+                    │   ├── TeleportGUI.lua<br>
+                    │   └── Tes123.lua<br>
+                    ├── api/               # (Opsional) API endpoint<br>
+                    │   └── script.js<br>
+                    └── vercel.json        # Konfigurasi Vercel
+                </div>
+
+                <h4>🚀 Langkah-langkah:</h4>
+                <ol style="margin-left: 20px; margin-bottom: 15px;">
+                    <li><strong>Generate semua file .lua</strong> dari website ini</li>
+                    <li><strong>Buat folder <code>scripts</code></strong> di komputer Anda</li>
+                    <li><strong>Simpan semua file .lua</strong> ke folder tersebut</li>
+                    <li><strong>Upload ke GitHub</strong> repository baru</li>
+                    <li><strong>Login ke Vercel</strong> dan import repository</li>
+                    <li><strong>Deploy</strong> dengan satu klik!</li>
+                </ol>
+
+                <h4>🔗 Contoh URL setelah deploy:</h4>
+                <div style="background: var(--darker); padding: 10px; border-radius: 5px; margin-bottom: 15px;">
+                    <code>https://roblox-scripts.vercel.app/scripts/AutoFarm.lua</code><br>
+                    <code>https://roblox-scripts.vercel.app/scripts/TeleportGUI.lua</code><br>
+                    <code>https://roblox-scripts.vercel.app/scripts/Tes123.lua</code>
+                </div>
+
+                <h4>🎮 Contoh Penggunaan di Executor:</h4>
+                <div style="background: var(--dark-light); padding: 10px; border-radius: 5px; font-family: 'Roboto Mono', monospace;">
+                    <span style="color: var(--success)">-- Auto Farm Script</span><br>
+                    loadstring(game:HttpGet("https://roblox-scripts.vercel.app/scripts/AutoFarm.lua"))()
+                </div>
             </div>
-            
+
             <div class="modal-actions">
-                <button class="btn btn-secondary" id="copyAllRawLinksBtn">
-                    <i class="fas fa-copy"></i> Copy Semua Links
+                <button class="btn btn-success" id="generateAllFilesBtn">
+                    <i class="fas fa-download"></i> Generate Semua File
                 </button>
-                <button class="btn btn-success" id="downloadAllFilesBtn">
-                    <i class="fas fa-download"></i> Download Semua (.zip)
-                </button>
-                <button class="btn" id="closeAllRawLinksBtn">Tutup</button>
+                <button class="btn" id="closeVercelGuideBtn">Tutup</button>
             </div>
         </div>
     </div>
@@ -783,7 +827,7 @@
     <!-- Notification -->
     <div class="notification" id="notification"></div>
 
-    <!-- Hidden iframe untuk download -->
+    <!-- Hidden elements untuk download -->
     <iframe id="downloadFrame" style="display: none;"></iframe>
 </body>
 
@@ -807,13 +851,15 @@
     const importBtn = document.getElementById('importBtn');
     const howToUseBtn = document.getElementById('howToUseBtn');
     const viewAllRawLinksBtn = document.getElementById('viewAllRawLinksBtn');
+    const vercelGuideBtn = document.getElementById('vercelGuideBtn');
 
     // Modal elements
     const deleteModal = document.getElementById('deleteModal');
     const howToModal = document.getElementById('howToModal');
     const rawLinkModal = document.getElementById('rawLinkModal');
-    const allRawLinksModal = document.getElementById('allRawLinksModal');
+    const vercelGuideModal = document.getElementById('vercelGuideModal');
     
+    // Buttons
     const closeDeleteModal = document.getElementById('closeDeleteModal');
     const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
     const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
@@ -821,20 +867,25 @@
     const closeHowToBtn = document.getElementById('closeHowToBtn');
     const closeRawLinkModal = document.getElementById('closeRawLinkModal');
     const copyRawLinkBtn = document.getElementById('copyRawLinkBtn');
-    const testRawLinkBtn = document.getElementById('testRawLinkBtn');
     const copyExecutorCodeBtn = document.getElementById('copyExecutorCodeBtn');
     const downloadFileBtn = document.getElementById('downloadFileBtn');
-    const closeAllRawLinksModal = document.getElementById('closeAllRawLinksModal');
-    const copyAllRawLinksBtn = document.getElementById('copyAllRawLinksBtn');
-    const downloadAllFilesBtn = document.getElementById('downloadAllFilesBtn');
-    const closeAllRawLinksBtn = document.getElementById('closeAllRawLinksBtn');
+    const closeVercelGuideModal = document.getElementById('closeVercelGuideModal');
+    const closeVercelGuideBtn = document.getElementById('closeVercelGuideBtn');
+    const generateAllFilesBtn = document.getElementById('generateAllFilesBtn');
 
     // File info elements
     const fileNameElement = document.getElementById('fileName');
-    const fileSizeElement = document.getElementById('fileSize');
+    const filePathElement = document.getElementById('filePath');
+    const exampleFilenameElement = document.getElementById('exampleFilename');
 
     // Notification element
     const notification = document.getElementById('notification');
+
+    // Konfigurasi Vercel
+    const vercelConfig = {
+        domain: 'https://your-app-name.vercel.app',
+        scriptPath: '/scripts'
+    };
 
     // Inisialisasi
     document.addEventListener('DOMContentLoaded', function() {
@@ -851,6 +902,7 @@
         importBtn.addEventListener('click', importScripts);
         howToUseBtn.addEventListener('click', () => showModal(howToModal));
         viewAllRawLinksBtn.addEventListener('click', showAllRawFilesModal);
+        vercelGuideBtn.addEventListener('click', () => showModal(vercelGuideModal));
         
         // Modal event listeners
         closeDeleteModal.addEventListener('click', () => hideModal(deleteModal));
@@ -859,16 +911,14 @@
         closeHowToModal.addEventListener('click', () => hideModal(howToModal));
         closeHowToBtn.addEventListener('click', () => hideModal(howToModal));
         closeRawLinkModal.addEventListener('click', () => hideModal(rawLinkModal));
-        closeAllRawLinksModal.addEventListener('click', () => hideModal(allRawLinksModal));
-        closeAllRawLinksBtn.addEventListener('click', () => hideModal(allRawLinksModal));
+        closeVercelGuideModal.addEventListener('click', () => hideModal(vercelGuideModal));
+        closeVercelGuideBtn.addEventListener('click', () => hideModal(vercelGuideModal));
         
         // Raw file modal listeners
-        copyRawLinkBtn.addEventListener('click', copyRawFileLink);
-        testRawLinkBtn.addEventListener('click', testRawFileLink);
+        copyRawLinkBtn.addEventListener('click', copyVercelURL);
         copyExecutorCodeBtn.addEventListener('click', copyExecutorCode);
         downloadFileBtn.addEventListener('click', downloadLuaFile);
-        copyAllRawLinksBtn.addEventListener('click', copyAllRawFileLinks);
-        downloadAllFilesBtn.addEventListener('click', downloadAllLuaFiles);
+        generateAllFilesBtn.addEventListener('click', generateAllLuaFiles);
         
         // Executor tabs
         document.querySelectorAll('.executor-tab').forEach(tab => {
@@ -898,7 +948,7 @@
             if (event.target === deleteModal) hideModal(deleteModal);
             if (event.target === howToModal) hideModal(howToModal);
             if (event.target === rawLinkModal) hideModal(rawLinkModal);
-            if (event.target === allRawLinksModal) hideModal(allRawLinksModal);
+            if (event.target === vercelGuideModal) hideModal(vercelGuideModal);
         });
     });
 
@@ -1133,7 +1183,7 @@ while true do
     wait(1)
 end`;
         
-        scriptNameInput.value = 'Auto Farm Example';
+        scriptNameInput.value = 'AutoFarm';
         scriptContentTextarea.value = exampleScript;
         currentScriptId = null;
         showNotification('Contoh script berhasil dimuat', 'info');
@@ -1210,7 +1260,8 @@ end`;
             .replace(/[<>:"/\\|?*]/g, '') // Hapus karakter khusus
             .replace(/\s+/g, '_') // Ganti spasi dengan underscore
             .replace(/[^\w\s-]/g, '') // Hapus karakter non-alphanumeric
-            .trim();
+            .trim()
+            .toLowerCase();
         
         // Jika nama kosong, gunakan default
         if (!safeName) safeName = 'script';
@@ -1219,45 +1270,31 @@ end`;
         return `${safeName}.lua`;
     }
 
-    // Fungsi untuk generate raw file link sebagai Blob URL
-    function generateRawFileBlob(scriptId) {
+    // Fungsi untuk generate raw file untuk Vercel
+    function generateVercelFile(scriptId) {
         const script = scripts.find(s => s.id === scriptId);
         if (!script) return null;
         
         const fileName = createSafeFileName(script.name);
         const fileContent = script.content;
+        const filePath = `/scripts/${fileName}`;
         
         // Buat blob dari konten
         const blob = new Blob([fileContent], { type: 'text/plain' });
         
-        // Buat URL untuk blob
+        // Buat URL untuk blob (untuk download)
         const blobUrl = URL.createObjectURL(blob);
         
+        // Generate Vercel URL (contoh)
+        const vercelUrl = `https://[nama-app-anda].vercel.app${filePath}`;
+        
         return {
-            url: blobUrl,
             fileName: fileName,
+            filePath: filePath,
+            content: fileContent,
+            downloadUrl: blobUrl,
+            vercelUrl: vercelUrl,
             fileSize: blob.size
-        };
-    }
-
-    // Fungsi untuk generate data URL
-    function generateRawFileDataURL(scriptId) {
-        const script = scripts.find(s => s.id === scriptId);
-        if (!script) return null;
-        
-        const fileName = createSafeFileName(script.name);
-        const fileContent = script.content;
-        
-        // Encode konten untuk data URL
-        const encodedContent = encodeURIComponent(fileContent);
-        
-        // Buat data URL
-        const dataUrl = `data:text/plain;charset=utf-8,${encodedContent}`;
-        
-        return {
-            url: dataUrl,
-            fileName: fileName,
-            fileSize: new Blob([fileContent]).size
         };
     }
 
@@ -1270,25 +1307,22 @@ end`;
         }
         
         // Generate file info
-        const fileInfo = generateRawFileDataURL(scriptId);
+        const fileInfo = generateVercelFile(scriptId);
         
         // Update UI
         fileNameElement.textContent = fileInfo.fileName;
-        fileSizeElement.textContent = formatFileSize(fileInfo.fileSize);
-        document.getElementById('rawLinkText').textContent = fileInfo.url;
+        filePathElement.textContent = fileInfo.filePath;
+        exampleFilenameElement.textContent = fileInfo.fileName;
+        document.getElementById('rawLinkText').textContent = fileInfo.vercelUrl;
         
         // Update semua URL di executor examples
         document.querySelectorAll('.executor-code .url').forEach(element => {
-            element.textContent = fileInfo.url;
+            element.textContent = fileInfo.vercelUrl;
         });
         
         // Set download attribute
-        downloadFileBtn.href = fileInfo.url;
+        downloadFileBtn.href = fileInfo.downloadUrl;
         downloadFileBtn.download = fileInfo.fileName;
-        
-        // Tambahkan data script ID untuk penggunaan nanti
-        document.getElementById('rawLinkText').dataset.scriptId = scriptId;
-        document.getElementById('rawLinkText').dataset.scriptName = script.name;
         
         showModal(rawLinkModal);
     }
@@ -1303,25 +1337,16 @@ end`;
         showRawFileModal(currentScriptId);
     }
 
-    // Fungsi untuk copy raw file link
-    function copyRawFileLink() {
+    // Fungsi untuk copy Vercel URL
+    function copyVercelURL() {
         const rawLink = document.getElementById('rawLinkText').textContent;
         
         navigator.clipboard.writeText(rawLink).then(() => {
-            showNotification('Link file .lua berhasil dicopy!', 'success');
+            showNotification('URL Vercel berhasil dicopy!', 'success');
         }).catch(err => {
             console.error('Gagal copy:', err);
-            showNotification('Gagal menyalin link', 'error');
+            showNotification('Gagal menyalin URL', 'error');
         });
-    }
-
-    // Fungsi untuk test raw file link
-    function testRawFileLink() {
-        const rawLink = document.getElementById('rawLinkText').textContent;
-        
-        // Buka link di tab baru
-        window.open(rawLink, '_blank');
-        showNotification('Membuka file .lua di tab baru...', 'info');
     }
 
     // Fungsi untuk copy executor code
@@ -1352,99 +1377,70 @@ end`;
             return;
         }
         
-        const filesListElement = document.getElementById('allRawLinksList');
-        filesListElement.innerHTML = '';
-        
-        scripts.forEach(script => {
-            const fileInfo = generateRawFileDataURL(script.id);
-            const fileElement = document.createElement('div');
-            fileElement.className = 'script-item';
-            fileElement.style.marginBottom = '10px';
-            fileElement.innerHTML = `
-                <div class="script-item-header">
-                    <div class="script-name">${script.name}</div>
-                    <div class="script-date">${formatFileSize(fileInfo.fileSize)}</div>
-                </div>
-                <div class="script-preview" style="font-size: 0.8rem; margin-bottom: 5px;">${fileInfo.fileName}</div>
-                <div class="script-actions">
-                    <a class="btn btn-small btn-success" href="${fileInfo.url}" download="${fileInfo.fileName}">
-                        <i class="fas fa-download"></i> Download
-                    </a>
-                    <button class="btn btn-small btn-secondary copy-file-link-btn" data-link="${fileInfo.url}">
-                        <i class="fas fa-copy"></i> Copy Link
-                    </button>
-                    <button class="btn btn-small btn-warning copy-executor-btn" data-link="${fileInfo.url}">
-                        <i class="fas fa-terminal"></i> Executor Code
-                    </button>
-                </div>
-            `;
-            
-            filesListElement.appendChild(fileElement);
+        // Create a temporary modal untuk show all files
+        const filesList = scripts.map(script => {
+            const fileInfo = generateVercelFile(script.id);
+            return {
+                name: script.name,
+                fileName: fileInfo.fileName,
+                vercelUrl: fileInfo.vercelUrl,
+                downloadUrl: fileInfo.downloadUrl
+            };
         });
         
-        // Add event listeners untuk tombol di dalam modal
-        document.querySelectorAll('.copy-file-link-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const link = this.getAttribute('data-link');
-                navigator.clipboard.writeText(link).then(() => {
-                    showNotification('Link file berhasil dicopy!', 'success');
-                });
-            });
+        let message = `📁 **Semua File .lua untuk Vercel:**\n\n`;
+        filesList.forEach(file => {
+            message += `**${file.name}**\n`;
+            message += `File: ${file.fileName}\n`;
+            message += `URL: ${file.vercelUrl}\n`;
+            message += `Executor: loadstring(game:HttpGet("${file.vercelUrl}"))()\n\n`;
         });
         
-        document.querySelectorAll('.copy-executor-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const link = this.getAttribute('data-link');
-                const executorCode = `loadstring(game:HttpGet("${link}"))()`;
-                navigator.clipboard.writeText(executorCode).then(() => {
-                    showNotification('Kode executor berhasil dicopy!', 'success');
-                });
-            });
-        });
+        message += `\n**📦 Instruksi Deploy:**\n`;
+        message += `1. Download semua file .lua di atas\n`;
+        message += `2. Buat folder 'scripts' di project Anda\n`;
+        message += `3. Masukkan semua file .lua ke folder scripts\n`;
+        message += `4. Upload ke GitHub dan deploy ke Vercel\n\n`;
+        message += `**🎮 Contoh penggunaan:**\n`;
+        message += `loadstring(game:HttpGet("https://[app-name].vercel.app/scripts/${filesList[0]?.fileName || 'script.lua'}"))()`;
         
-        showModal(allRawLinksModal);
+        alert(message);
     }
 
-    // Fungsi untuk copy semua raw file links
-    function copyAllRawFileLinks() {
-        let allLinksText = '';
-        
-        scripts.forEach(script => {
-            const fileInfo = generateRawFileDataURL(script.id);
-            allLinksText += `${script.name} (${fileInfo.fileName}):\n${fileInfo.url}\n\n`;
-        });
-        
-        navigator.clipboard.writeText(allLinksText).then(() => {
-            showNotification(`Semua ${scripts.length} file links berhasil dicopy!`, 'success');
-        }).catch(err => {
-            console.error('Gagal copy:', err);
-            showNotification('Gagal menyalin links', 'error');
-        });
-    }
-
-    // Fungsi untuk download semua file .lua sebagai zip (simulasi)
-    function downloadAllLuaFiles() {
+    // Fungsi untuk generate semua file .lua
+    function generateAllLuaFiles() {
         if (scripts.length === 0) {
-            showNotification('Tidak ada script untuk didownload', 'warning');
+            showNotification('Tidak ada script untuk di-generate', 'warning');
             return;
         }
         
-        showNotification(`Membuat archive ${scripts.length} file...`, 'info');
+        showNotification(`Membuat ${scripts.length} file .lua...`, 'info');
         
-        // Untuk implementasi sebenarnya, butuh library JSZip
-        // Ini adalah implementasi sederhana: download satu per satu
-        setTimeout(() => {
-            showNotification('Fitur download ZIP sedang dalam pengembangan. Download manual satu per satu.', 'warning');
-        }, 1000);
-    }
-
-    // Fungsi untuk format ukuran file
-    function formatFileSize(bytes) {
-        if (bytes === 0) return '0 Bytes';
-        const k = 1024;
-        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        // Buat string untuk semua file
+        let allFilesInfo = `# Script Roblox untuk Vercel\n`;
+        allFilesInfo += `# Dibuat pada: ${new Date().toLocaleString()}\n`;
+        allFilesInfo += `# Total Script: ${scripts.length}\n\n`;
+        
+        scripts.forEach((script, index) => {
+            const fileInfo = generateVercelFile(script.id);
+            allFilesInfo += `## ${index + 1}. ${script.name}\n`;
+            allFilesInfo += `- File: ${fileInfo.fileName}\n`;
+            allFilesInfo += `- Path: ${fileInfo.filePath}\n`;
+            allFilesInfo += `- URL: ${fileInfo.vercelUrl}\n`;
+            allFilesInfo += `- Executor: loadstring(game:HttpGet("${fileInfo.vercelUrl}"))()\n\n`;
+        });
+        
+        // Buat file README
+        const blob = new Blob([allFilesInfo], { type: 'text/plain' });
+        const blobUrl = URL.createObjectURL(blob);
+        
+        // Download file README
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        link.download = 'README-vercel-instructions.txt';
+        link.click();
+        
+        showNotification(`Instruksi deploy ke Vercel telah didownload!`, 'success');
     }
 
     // Fungsi untuk format tanggal
